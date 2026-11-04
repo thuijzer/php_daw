@@ -1,0 +1,20 @@
+{
+    "name": "thuijzer/php_daw",
+    "description": "A DAW for generating audio files with PHP",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Thuijzer\\PhpDaw\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Thomas Huijzer",
+            "email": "thomas@thuijzer.nl"
+        }
+    ],
+    "require": {
+      "php": "^8.3"
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "require": {
+    "thuijzer/php_daw": "dev-main"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../",
+      "options": {
+        "symlink": true
+      }
+    }
+  ]
+}

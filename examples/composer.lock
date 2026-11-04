@@ -1,0 +1,50 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "076727a405b9c2523b52f75a54ee189e",
+    "packages": [
+        {
+            "name": "thuijzer/php_daw",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "..",
+                "reference": "77d9b7e65ef701c321efae08724b5ca66a4b6fe8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Thuijzer\\PhpDaw\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Thomas Huijzer",
+                    "email": "thomas@thuijzer.nl"
+                }
+            ],
+            "description": "A DAW for generating audio files with PHP",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "thuijzer/php_daw": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
+}
