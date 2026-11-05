@@ -22,8 +22,21 @@ $track = new Track(
         new SimpleTone()
     ],
     [
-        new Signal(0, SignalMessage::NoteOn, 60, 100),
-        new Signal(3 * $sampleRate->value, SignalMessage::NoteOff, 60, 100),
+        new Signal(0 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),
+        new Signal(.75 * $sampleRate->value, SignalMessage::NoteOff, 60),
+
+        new Signal(.5 * $sampleRate->value, SignalMessage::NoteOn, 64, 127),
+        new Signal(1.25 * $sampleRate->value, SignalMessage::NoteOff, 64),
+
+        new Signal(1 * $sampleRate->value, SignalMessage::NoteOn, 67, 127),
+        new Signal(1.75 * $sampleRate->value, SignalMessage::NoteOff, 67),
+
+        new Signal(2 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),
+        new Signal(3 * $sampleRate->value, SignalMessage::NoteOff, 60),
+        new Signal(2 * $sampleRate->value, SignalMessage::NoteOn, 64, 127),
+        new Signal(3 * $sampleRate->value, SignalMessage::NoteOff, 64),
+        new Signal(2 * $sampleRate->value, SignalMessage::NoteOn, 67, 127),
+        new Signal(3 * $sampleRate->value, SignalMessage::NoteOff, 67),
     ]
 );
 $daw->addTrack($track);
