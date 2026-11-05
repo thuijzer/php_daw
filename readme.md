@@ -20,7 +20,7 @@ $daw = new Daw(
 
 $track = new Track(
     [
-        new SimpleTone(new SimpleTone(SimpleToneWaveForm::Triangle))
+        new SimpleTone(SimpleToneWaveForm::Triangle)
     ],
     [
         new Signal(0 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),
