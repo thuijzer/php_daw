@@ -134,3 +134,7 @@ for($s = 0; $s < $totalSamples; $s++) {
     }
 }
 ```
+
+## Why!?
+
+Because it's a fun exercise, a tool to learn about audio processing and a way to create cool music by using PHP.
