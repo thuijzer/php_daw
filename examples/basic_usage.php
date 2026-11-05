@@ -11,6 +11,7 @@ use Thuijzer\PhpDaw\Enums\SignalMessage;
 use Thuijzer\PhpDaw\Processors\Effects\SimpleReverb;
 use Thuijzer\PhpDaw\Processors\Effects\SimpleReverbType;
 use Thuijzer\PhpDaw\Processors\Generators\SimpleTone;
+use Thuijzer\PhpDaw\Processors\Generators\SimpleToneWaveForm;
 
 include __DIR__ . '/../vendor/autoload.php';
 
@@ -25,7 +26,7 @@ $daw = new Daw(
 
 $track = new Track(
     [
-        new SimpleTone()
+        new SimpleTone(SimpleToneWaveForm::Triangle)
     ],
     [
         new Signal(0 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),

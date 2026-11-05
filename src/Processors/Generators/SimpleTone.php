@@ -18,7 +18,9 @@ class SimpleTone implements IProcessor
     private const float Sustain = 0.0;
     private const float Release = 0.03;
 
-    public function __construct()
+    public function __construct(
+        readonly private SimpleToneWaveForm $waveForm
+    )
     {
 
     }
@@ -42,6 +44,7 @@ class SimpleTone implements IProcessor
         $poly = [];
         for ($i = 0; $i < $polyphony; $i++) {
             $poly[$i] = new SimpleTonePoly(
+                $this->waveForm,
                 $sampleRate,
                 self::Attack,
                 self::Decay,
@@ -111,6 +114,23 @@ class SimpleTonePoly extends SynthHelper
     private int $note;
     private float $amp;
 
+    public function __construct(
+        private SimpleToneWaveForm $waveForm,
+        protected SampleRate $sampleRate,
+        protected float $attack,
+        protected float $decay,
+        protected float $sustain,
+        protected float $release
+    ) {
+        parent::__construct(
+            $sampleRate,
+            $attack,
+            $decay,
+            $sustain,
+            $release
+        );
+    }
+
     public function getNote(): int
     {
         return $this->note;
@@ -157,11 +177,27 @@ class SimpleTonePoly extends SynthHelper
             $gain *= $t;
         }
 
-        $this->amp = $gain * sin($this->phase * 2 * M_PI);
+        switch ($this->waveForm) {
+            case SimpleToneWaveForm::Sine:
+                $this->amp = $gain * sin($this->phase * 2 * M_PI);
+                break;
+            case SimpleToneWaveForm::Square:
+                $this->amp = $gain * ($this->phase < 0.5 ? 1 : -1);
+                break;
+            case SimpleToneWaveForm::Triangle:
+                $this->amp = $gain * (4 * abs(fmod($this->phase, 1) - 0.5) - 1);
+                break;
+        }
 
         $this->phase += $this->frequency / $this->sampleRate->value;
         if ($this->phase >= 1){
             $this->phase -= 1;
         }
     }
+}
+
+enum SimpleToneWaveForm {
+    case Sine;
+    case Square;
+    case Triangle;
 }
