@@ -14,7 +14,8 @@ $sampleRate = SampleRate::R44100;
 $daw = new Daw(
     $sampleRate,
     BitDepth::D16,
-    OutputChannels::STEREO
+    OutputChannels::STEREO,
+    true
 );
 
 $track = new Track(
@@ -42,7 +43,13 @@ $track = new Track(
 $daw->addTrack($track);
 
 $daw->setMainProcessors([
-    new SimpleReverb()
+    new SimpleReverb(
+        SimpleReverbType::Cathedral,
+        0.9,
+        0.8,
+        0.1,
+        50
+    )
 ]);
 
 $daw->render(

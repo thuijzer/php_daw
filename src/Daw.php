@@ -19,11 +19,13 @@ class Daw
     private array $mainProcessors = [];
     /** @var Signal[] */
     private array $mainSignals = [];
+    private int $renderStart = 0;
 
     public function __construct(
         readonly public SampleRate $sampleRate,
         readonly public BitDepth $bitDepth,
-        readonly public OutputChannels $outputChannels
+        readonly public OutputChannels $outputChannels,
+        readonly public bool $debug = false
     ) {
     }
 
@@ -55,21 +57,25 @@ class Daw
         int $endSample,
         ?string $filename = null
     ): void {
-        if($endSample <= $startSample) {
+        if ($endSample <= $startSample) {
             throw new \InvalidArgumentException('End sample must be greater than start sample');
         }
+        $this->renderStart = microtime(true);
+
+        $this->log('Rendering from sample ' . $startSample . ' to ' . $endSample);
 
         $totalSamples = $endSample - $startSample;
         $samples = new \SplFixedArray($this->outputChannels->value);
-        for($c = 0; $c < $this->outputChannels->value; $c++) {
+        for ($c = 0; $c < $this->outputChannels->value; $c++) {
             $samples[$c] = new \SplFixedArray($totalSamples);
             for ($s = 0; $s < $totalSamples; $s++) {
                 $samples[$c][$s] = 0.0;
             }
         }
 
-        foreach ($this->tracks as $track) {
-            foreach($track->processors as $processor) {
+        foreach ($this->tracks as $t => $track) {
+            foreach ($track->processors as $p => $processor) {
+                $this->log('Rendering track ' . ($t + 1) . ' processor ' . ($p + 1));
                 $processor->process(
                     $this->sampleRate,
                     $startSample,
@@ -79,7 +85,8 @@ class Daw
             }
         }
 
-        foreach ($this->mainProcessors as $processor) {
+        foreach ($this->mainProcessors as $p => $processor) {
+            $this->log('Rendering main processor ' . ($p + 1));
             $processor->process(
                 $this->sampleRate,
                 $startSample,
@@ -88,6 +95,7 @@ class Daw
             );
         }
 
+        $this->log('Outputting');
         switch ($outputFormat) {
             case OutputFormat::WAV:
                 Wav::render(
@@ -98,6 +106,18 @@ class Daw
                     $filename
                 );
                 break;
+        }
+
+        $this->log('Done');
+        if($this->debug) {
+            $this->log('Mem: ' . number_format(memory_get_usage() / 1024 / 1024, 2) . ' MB');
+        }
+    }
+
+    private function log($message): void
+    {
+        if ($this->debug) {
+            echo number_format(microtime(true) - $this->renderStart, 3) . ': ' . $message . PHP_EOL;
         }
     }
 }
