@@ -74,7 +74,7 @@ class Daw
                     $this->sampleRate,
                     $startSample,
                     $samples,
-                    $track->signals
+                    $track->getSignals()
                 );
             }
         }

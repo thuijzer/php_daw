@@ -1,0 +1,11 @@
+<?php
+
+namespace Thuijzer\PhpDaw\Enums;
+
+enum ADSR
+{
+    case Attack;
+    case Decay;
+    case Sustain;
+    case Release;
+}

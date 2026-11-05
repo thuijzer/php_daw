@@ -12,29 +12,28 @@ class Wav implements IRenderer
         SampleRate $sampleRate,
         BitDepth $bitDepth,
         OutputChannels $outputChannels,
-        array $samples,
+        \SplFixedArray $samples,
         ?string $filename = null
     ): void {
 
         $sampleRate = $sampleRate->value;
         $numChannels = $outputChannels->value;
         $bitsPerSample = $bitDepth->value;
-
-        $duration = 1; // seconds
-        $totalSamples = $sampleRate * $duration;
+        $totalSamples = count($samples[0]);
         $pcmData = '';
+        $sampleMultiplier = 0;
 
-        for ($i = 0; $i < $totalSamples; $i++) {
-            // Generate sine wave value between -1 and 1
-            $t = $i / $sampleRate;
-            $sampleValue = sin(2 * M_PI * 440 * $t);
+        switch ($bitDepth) {
+            case BitDepth::D16:
+                $sampleMultiplier = 32767;
+                break;
+        }
 
-            // Scale to 16-bit signed integer range (-32768 to 32767)
-            $intValue = (int)($sampleValue * 32767);
-
-            // Pack into a 16-bit signed little-endian integer ('v' can be used with signed adjustment, or unpack/pack)
-            // Using 'v' for unsigned short after shifting, or pack('s', ...) for signed 16-bit little-endian.
-            $pcmData .= pack('s', $intValue);
+        for ($s = 0; $s < $totalSamples; $s++) {
+            for($c = 0; $c < $numChannels; $c++) {
+                $intValue = (int)(min(1, max(-1, $samples[$c][$s])) * $sampleMultiplier);
+                $pcmData .= pack('s', $intValue);
+            }
         }
 
         $dataSize = strlen($pcmData);

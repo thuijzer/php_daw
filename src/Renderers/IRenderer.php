@@ -2,6 +2,7 @@
 
 namespace Thuijzer\PhpDaw\Renderers;
 
+use SplFixedArray;
 use Thuijzer\PhpDaw\Enums\BitDepth;
 use Thuijzer\PhpDaw\Enums\OutputChannels;
 use Thuijzer\PhpDaw\Enums\SampleRate;
@@ -12,7 +13,7 @@ interface IRenderer
      * @param SampleRate $sampleRate
      * @param BitDepth $bitDepth
      * @param OutputChannels $outputChannels
-     * @param float[][] $samples
+     * @param SplFixedArray $samples
      * @param string|null $filename
      * @return void
      */
@@ -20,7 +21,7 @@ interface IRenderer
         SampleRate $sampleRate,
         BitDepth $bitDepth,
         OutputChannels $outputChannels,
-        array $samples,
+        SplFixedArray $samples,
         ?string $filename = null
     ): void;
 }
