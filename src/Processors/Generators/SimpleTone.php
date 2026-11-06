@@ -7,6 +7,7 @@ use Thuijzer\PhpDaw\Data\Signal;
 use Thuijzer\PhpDaw\Enums\ADSR;
 use Thuijzer\PhpDaw\Enums\SampleRate;
 use Thuijzer\PhpDaw\Enums\SignalMessage;
+use Thuijzer\PhpDaw\Enums\WaveForm;
 use Thuijzer\PhpDaw\Helpers\NoteHelper;
 use Thuijzer\PhpDaw\Helpers\SynthHelper;
 use Thuijzer\PhpDaw\Processors\IProcessor;
@@ -19,7 +20,7 @@ class SimpleTone implements IProcessor
     private const float Release = 0.03;
 
     public function __construct(
-        readonly private SimpleToneWaveForm $waveForm
+        readonly private WaveForm $waveForm
     )
     {
 
@@ -65,7 +66,7 @@ class SimpleTone implements IProcessor
 
                 if ($currentSignal->message == SignalMessage::NoteOn) {
                     for($p = 0; $p < $polyphony; $p++) {
-                        if($poly[$p]->getIsActive() === false) {
+                        if($poly[$p]->getState() === ADSR::Idle) {
                             $poly[$p]->on($currentSignal->value1, $currentSignal->value2 / 127.0);
                             break;
                         }
@@ -74,7 +75,7 @@ class SimpleTone implements IProcessor
 
                 if ($currentSignal->message == SignalMessage::NoteOff) {
                     for($p = 0; $p < $polyphony; $p++) {
-                        if($poly[$p]->getIsActive() === true && $poly[$p]->getNote() == $currentSignal->value1) {
+                        if($poly[$p]->getState() !== ADSR::Idle && $poly[$p]->getNote() == $currentSignal->value1) {
                             $poly[$p]->off();
                         }
                     }
@@ -88,7 +89,7 @@ class SimpleTone implements IProcessor
 
             $totalPolyAmp = 0;
             for($p = 0; $p < count($poly); $p++) {
-                if($poly[$p]->getIsActive() === true) {
+                if($poly[$p]->getState() !== ADSR::Idle) {
                     $poly[$p]->synthesize();
                     $totalPolyAmp += $poly[$p]->getAmp();
                 }
@@ -115,7 +116,7 @@ class SimpleTonePoly extends SynthHelper
     private float $amp;
 
     public function __construct(
-        private SimpleToneWaveForm $waveForm,
+        private readonly WaveForm $waveForm,
         protected SampleRate $sampleRate,
         protected float $attack,
         protected float $decay,
@@ -144,7 +145,6 @@ class SimpleTonePoly extends SynthHelper
     public function on(int $note, float $velocity):void
     {
         $this->note = $note;
-        $this->isActive = true;
         $this->state = ADSR::Attack;
         $this->frequency = NoteHelper::frequencyFromNote($note);
         $this->amplitude = 0.0;
@@ -162,7 +162,7 @@ class SimpleTonePoly extends SynthHelper
 
     public function synthesize():void
     {
-        if(!$this->isActive) {
+        if($this->state === ADSR::Idle) {
             return;
         }
 
@@ -178,14 +178,21 @@ class SimpleTonePoly extends SynthHelper
         }
 
         switch ($this->waveForm) {
-            case SimpleToneWaveForm::Sine:
-                $this->amp = $gain * sin($this->phase * 2 * M_PI);
-                break;
-            case SimpleToneWaveForm::Square:
+            case WaveForm::Square:
                 $this->amp = $gain * ($this->phase < 0.5 ? 1 : -1);
                 break;
-            case SimpleToneWaveForm::Triangle:
+            case WaveForm::Triangle:
                 $this->amp = $gain * (4 * abs(fmod($this->phase, 1) - 0.5) - 1);
+                break;
+            case WaveForm::Sawtooth:
+                $this->amp = $gain * (2 * fmod($this->phase, 1) - 1);
+                break;
+            case WaveForm::Noise:
+                $this->amp = $gain * rand(-1.0, 1.0);
+                break;
+            case WaveForm::Sine:
+            default:
+                $this->amp = $gain * sin($this->phase * 2 * M_PI);
                 break;
         }
 
@@ -194,10 +201,4 @@ class SimpleTonePoly extends SynthHelper
             $this->phase -= 1;
         }
     }
-}
-
-enum SimpleToneWaveForm {
-    case Sine;
-    case Square;
-    case Triangle;
 }

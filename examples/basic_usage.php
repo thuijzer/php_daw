@@ -8,6 +8,7 @@ use Thuijzer\PhpDaw\Enums\OutputChannels;
 use Thuijzer\PhpDaw\Enums\OutputFormat;
 use Thuijzer\PhpDaw\Enums\SampleRate;
 use Thuijzer\PhpDaw\Enums\SignalMessage;
+use Thuijzer\PhpDaw\Enums\WaveForm;
 use Thuijzer\PhpDaw\Processors\Effects\SimpleReverb;
 use Thuijzer\PhpDaw\Processors\Effects\SimpleReverbType;
 use Thuijzer\PhpDaw\Processors\Generators\SimpleTone;
@@ -26,7 +27,7 @@ $daw = new Daw(
 
 $track = new Track(
     [
-        new SimpleTone(SimpleToneWaveForm::Triangle)
+        new SimpleTone(WaveForm::Triangle)
     ],
     [
         new Signal(0 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),

@@ -7,9 +7,8 @@ use Thuijzer\PhpDaw\Enums\SampleRate;
 
 class SynthHelper
 {
-    protected bool $isActive = false;
-    protected float $amplitude;
-    protected ADSR $state = ADSR::Attack;
+    protected float $amplitude = 0.0;
+    protected ADSR $state = ADSR::Idle;
     protected float $amplitudeAtRelease = 0.0;
 
     public function __construct(
@@ -21,9 +20,9 @@ class SynthHelper
     ) {
     }
 
-    public function getIsActive(): bool
+    public function getState(): ADSR
     {
-        return $this->isActive;
+        return $this->state;
     }
 
     public function calcAmplitude(): void
@@ -59,24 +58,24 @@ class SynthHelper
             case ADSR::Release:
                 if ($this->release <= 0) {
                     $this->amplitude = 0;
-                    $this->isActive = false;
+                    $this->state = ADSR::Idle;
                 } else {
                     $this->amplitude -= $this->amplitudeAtRelease / ($this->release * $this->sampleRate->value);
                     if ($this->amplitude < 0) {
                         $this->amplitude = 0;
-                        $this->isActive = false;
+                        $this->state = ADSR::Idle;
                     }
                 }
                 break;
             default:
                 $this->amplitude = 0;
-                $this->isActive = false;
+                $this->state = ADSR::Idle;
                 break;
         }
 
         if ($this->amplitude < 0.00001) {
             $this->amplitude = 0;
-            $this->isActive = false;
+            $this->state = ADSR::Idle;
         }
     }
 }
