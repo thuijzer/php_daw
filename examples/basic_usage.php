@@ -9,10 +9,13 @@ use Thuijzer\PhpDaw\Enums\OutputFormat;
 use Thuijzer\PhpDaw\Enums\SampleRate;
 use Thuijzer\PhpDaw\Enums\SignalMessage;
 use Thuijzer\PhpDaw\Enums\WaveForm;
+use Thuijzer\PhpDaw\Processors\Effects\Fade;
+use Thuijzer\PhpDaw\Processors\Effects\FadeType;
+use Thuijzer\PhpDaw\Processors\Effects\Normalize;
+use Thuijzer\PhpDaw\Processors\Effects\SimpleDelay;
 use Thuijzer\PhpDaw\Processors\Effects\SimpleReverb;
 use Thuijzer\PhpDaw\Processors\Effects\SimpleReverbType;
 use Thuijzer\PhpDaw\Processors\Generators\SimpleTone;
-use Thuijzer\PhpDaw\Processors\Generators\SimpleToneWaveForm;
 
 include __DIR__ . '/../vendor/autoload.php';
 
@@ -27,7 +30,14 @@ $daw = new Daw(
 
 $track = new Track(
     [
-        new SimpleTone(WaveForm::Triangle)
+        new SimpleTone(
+            WaveForm::Triangle,
+            0.01,
+            5,
+            0.0,
+            0.1,
+            100
+        )
     ],
     [
         new Signal(0 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),
@@ -52,16 +62,24 @@ $daw->addTrack($track);
 $daw->setMainProcessors([
     new SimpleReverb(
         SimpleReverbType::Cathedral,
-        0.9,
+        0.6,
         0.8,
         0.1,
         50
-    )
+    ),
+    new SimpleDelay(
+       1200,
+        2000,
+        .2
+    ),
+    new Normalize(),
+    new Fade(FadeType::In, 0, 0.01 * $sampleRate->value),
+    new Fade(FadeType::Out, 4 * $sampleRate->value, 5 * $sampleRate->value),
 ]);
 
 $daw->render(
     OutputFormat::WAV,
     0,
-    4 * $sampleRate->value, // Render 4 seconds of audio
+    5 * $sampleRate->value, // Render 4 seconds of audio
     __DIR__ . '/output.wav'
 );

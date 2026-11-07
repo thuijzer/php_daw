@@ -14,16 +14,15 @@ use Thuijzer\PhpDaw\Processors\IProcessor;
 
 class SimpleTone implements IProcessor
 {
-    private const float Attack = 0.01;
-    private const float Decay = 8;
-    private const float Sustain = 0.0;
-    private const float Release = 0.03;
-
     public function __construct(
-        readonly private WaveForm $waveForm
+        readonly private WaveForm $waveForm,
+        readonly private float $attack = 0.01,
+        readonly private float $decay = 8,
+        readonly private float $sustain = 0.0,
+        readonly private float $release = 0.03,
+        readonly private float $stereoDelayMs = 0.1
     )
     {
-
     }
 
     /**
@@ -47,10 +46,11 @@ class SimpleTone implements IProcessor
             $poly[$i] = new SimpleTonePoly(
                 $this->waveForm,
                 $sampleRate,
-                self::Attack,
-                self::Decay,
-                self::Sustain,
-                self::Release
+                $this->attack,
+                $this->decay,
+                $this->sustain,
+                $this->release,
+                $this->stereoDelayMs
             );
         }
 
@@ -87,20 +87,23 @@ class SimpleTone implements IProcessor
             $leftAmp = $input[0][$s];
             $rightAmp = $totalChannels > 1 ? $input[1][$s] : 0.0;
 
-            $totalPolyAmp = 0;
+            $totalPolyAmpL = 0;
+            $totalPolyAmpR = 0;
             for($p = 0; $p < count($poly); $p++) {
                 if($poly[$p]->getState() !== ADSR::Idle) {
                     $poly[$p]->synthesize();
-                    $totalPolyAmp += $poly[$p]->getAmp();
+                    $totalPolyAmpL += $poly[$p]->getAmpL();
+                    $totalPolyAmpR += $poly[$p]->getAmpR();
                 }
             }
 
-            $totalPolyAmp /= $polyphony;
+            $totalPolyAmpL /= $polyphony;
+            $totalPolyAmpR /= $polyphony;
 
-            $leftAmp += $totalPolyAmp;
+            $leftAmp += $totalPolyAmpL;
             $input[0][$s] = $leftAmp;
             if ($totalChannels > 1) {
-                $rightAmp += $totalPolyAmp;
+                $rightAmp += $totalPolyAmpR;
                 $input[1][$s] = $rightAmp;
             }
         }
@@ -110,10 +113,12 @@ class SimpleTone implements IProcessor
 class SimpleTonePoly extends SynthHelper
 {
     private float $frequency = 0.0;
-    private float $phase = 0.0;
+    private float $phaseL = 0.0;
+    private float $phaseR = 0.0;
     private float $attackVelocity = 0.0;
     private int $note;
-    private float $amp;
+    private float $ampL;
+    private float $ampR;
 
     public function __construct(
         private readonly WaveForm $waveForm,
@@ -121,7 +126,8 @@ class SimpleTonePoly extends SynthHelper
         protected float $attack,
         protected float $decay,
         protected float $sustain,
-        protected float $release
+        protected float $release,
+        protected float $stereoDelayMs = 0.1
     ) {
         parent::__construct(
             $sampleRate,
@@ -137,9 +143,14 @@ class SimpleTonePoly extends SynthHelper
         return $this->note;
     }
 
-    public function getAmp(): float
+    public function getAmpL(): float
     {
-        return $this->amp;
+        return $this->ampL;
+    }
+
+    public function getAmpR(): float
+    {
+        return $this->ampR;
     }
 
     public function on(int $note, float $velocity):void
@@ -149,9 +160,11 @@ class SimpleTonePoly extends SynthHelper
         $this->frequency = NoteHelper::frequencyFromNote($note);
         $this->amplitude = 0.0;
         $this->attackVelocity = $velocity;
-        $this->phase = 0.0;
+        $this->phaseL = 0.0;
+        $this->phaseR = $this->stereoDelayMs / $this->sampleRate->value;
         $this->amplitudeAtRelease = 0.0;
-        $this->amp = 0.0;
+        $this->ampL = 0.0;
+        $this->ampR = 0.0;
     }
 
     public function off(): void
@@ -179,26 +192,35 @@ class SimpleTonePoly extends SynthHelper
 
         switch ($this->waveForm) {
             case WaveForm::Square:
-                $this->amp = $gain * ($this->phase < 0.5 ? 1 : -1);
+                $this->ampL = $gain * ($this->phaseL < 0.5 ? 1 : -1);
+                $this->ampR = $gain * ($this->phaseR < 0.5 ? 1 : -1);
                 break;
             case WaveForm::Triangle:
-                $this->amp = $gain * (4 * abs(fmod($this->phase, 1) - 0.5) - 1);
+                $this->ampL = $gain * (4 * abs(fmod($this->phaseL, 1) - 0.5) - 1);
+                $this->ampR = $gain * (4 * abs(fmod($this->phaseR, 1) - 0.5) - 1);
                 break;
             case WaveForm::Sawtooth:
-                $this->amp = $gain * (2 * fmod($this->phase, 1) - 1);
+                $this->ampL = $gain * (2 * fmod($this->phaseL, 1) - 1);
+                $this->ampR = $gain * (2 * fmod($this->phaseR, 1) - 1);
                 break;
             case WaveForm::Noise:
-                $this->amp = $gain * rand(-1.0, 1.0);
+                $this->ampL = $gain * rand(-1.0, 1.0);
+                $this->ampR = $this->ampL;
                 break;
             case WaveForm::Sine:
             default:
-                $this->amp = $gain * sin($this->phase * 2 * M_PI);
+                $this->ampL = $gain * sin($this->phaseL * 2 * M_PI);
+                $this->ampR = $gain * sin($this->phaseR * 2 * M_PI);
                 break;
         }
 
-        $this->phase += $this->frequency / $this->sampleRate->value;
-        if ($this->phase >= 1){
-            $this->phase -= 1;
+        $this->phaseL += $this->frequency / $this->sampleRate->value;
+        if ($this->phaseL >= 1){
+            $this->phaseL -= 1;
+        }
+        $this->phaseR += $this->frequency / $this->sampleRate->value;
+        if ($this->phaseR >= 1){
+            $this->phaseR -= 1;
         }
     }
 }

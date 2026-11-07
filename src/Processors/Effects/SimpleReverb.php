@@ -61,7 +61,7 @@ class SimpleReverb implements IProcessor
 
                 // Diffuse
                 foreach($diffusers as $diffuser) {
-                    $input[$c][$s] = $diffuser->process($input[$c][$s]);
+                    $sample = $diffuser->process($input[$c][$s]);
                 }
 
                 // Get from delays
@@ -89,7 +89,7 @@ class SimpleReverb implements IProcessor
                 // write the sample
                 $input[$c][$s] =
                     $input[$c][$s] * $reverbGainDry
-                    + (array_sum($mixed) / 8) * $reverbGainWet;
+                    + (array_sum($mixed) / 8 + $sample) * $reverbGainWet;
             }
         }
     }
