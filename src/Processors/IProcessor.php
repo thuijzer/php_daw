@@ -21,4 +21,6 @@ interface IProcessor
         SplFixedArray &$input,
         array $signals
     ): void;
+
+    public function getName(): string;
 }

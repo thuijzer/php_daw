@@ -75,7 +75,7 @@ class Daw
 
         foreach ($this->tracks as $t => $track) {
             foreach ($track->processors as $p => $processor) {
-                $this->log('Rendering track ' . ($t + 1) . ' processor ' . ($p + 1));
+                $this->log('Rendering track ' . ($t + 1) . ' processor ' . ($p + 1) . ': ' . $processor->getName());
                 $processor->process(
                     $this->sampleRate,
                     $startSample,
@@ -86,7 +86,7 @@ class Daw
         }
 
         foreach ($this->mainProcessors as $p => $processor) {
-            $this->log('Rendering main processor ' . ($p + 1));
+            $this->log('Rendering main processor ' . ($p + 1) . ': ' . $processor->getName());
             $processor->process(
                 $this->sampleRate,
                 $startSample,

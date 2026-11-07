@@ -25,6 +25,11 @@ class SimpleTone implements IProcessor
     {
     }
 
+    public function getName(): string
+    {
+        return substr(strrchr(self::class, '\\'), 1);
+    }
+
     /**
      * @param SampleRate $sampleRate
      * @param int $sampleOffset
@@ -38,7 +43,7 @@ class SimpleTone implements IProcessor
         SplFixedArray &$input,
         array $signals
     ): void {
-        $polyphony = 3;
+        $polyphony = 6;
 
         /** @var SimpleTonePoly[] $poly */
         $poly = [];

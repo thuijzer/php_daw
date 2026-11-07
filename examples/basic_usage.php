@@ -81,5 +81,5 @@ $daw->render(
     OutputFormat::WAV,
     0,
     5 * $sampleRate->value, // Render 4 seconds of audio
-    __DIR__ . '/output.wav'
+    __DIR__ . '/basic_usage.wav'
 );

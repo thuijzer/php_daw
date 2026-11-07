@@ -25,6 +25,11 @@ class SimpleReverb implements IProcessor
         }
     }
 
+    public function getName(): string
+    {
+        return substr(strrchr(self::class, '\\'), 1);
+    }
+
     public function process(
         SampleRate $sampleRate,
         int $sampleOffset,
