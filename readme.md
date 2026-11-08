@@ -10,6 +10,7 @@ A DAW for PHP that is able to generate audio files.
 
 ```php
 $sampleRate = SampleRate::R44100;
+$beat = TimeHelper::samplesFromBpm($sampleRate, 110);
 
 $daw = new Daw(
     $sampleRate,
@@ -20,24 +21,31 @@ $daw = new Daw(
 
 $track = new Track(
     [
-        new SimpleTone(SimpleToneWaveForm::Triangle)
+        new SimpleTone(
+            WaveForm::Triangle,
+            0.01,
+            5,
+            0.0,
+            0.1,
+            100
+        )
     ],
     [
-        new Signal(0 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),
-        new Signal(.75 * $sampleRate->value, SignalMessage::NoteOff, 60),
+        new Signal(0, SignalMessage::NoteOn, NoteHelper::mnfn('C4'), 127),
+        new Signal($beat, SignalMessage::NoteOff, NoteHelper::mnfn('C4')),
 
-        new Signal(.5 * $sampleRate->value, SignalMessage::NoteOn, 64, 127),
-        new Signal(1.25 * $sampleRate->value, SignalMessage::NoteOff, 64),
+        new Signal($beat, SignalMessage::NoteOn, NoteHelper::mnfn('E4'), 127),
+        new Signal($beat * 2, SignalMessage::NoteOff, NoteHelper::mnfn('E4')),
 
-        new Signal(1 * $sampleRate->value, SignalMessage::NoteOn, 67, 127),
-        new Signal(1.75 * $sampleRate->value, SignalMessage::NoteOff, 67),
+        new Signal($beat * 2, SignalMessage::NoteOn, NoteHelper::mnfn('G4'), 127),
+        new Signal($beat * 3, SignalMessage::NoteOff, NoteHelper::mnfn('G4')),
 
-        new Signal(2 * $sampleRate->value, SignalMessage::NoteOn, 60, 127),
-        new Signal(3 * $sampleRate->value, SignalMessage::NoteOff, 60),
-        new Signal(2 * $sampleRate->value, SignalMessage::NoteOn, 64, 127),
-        new Signal(3 * $sampleRate->value, SignalMessage::NoteOff, 64),
-        new Signal(2 * $sampleRate->value, SignalMessage::NoteOn, 67, 127),
-        new Signal(3 * $sampleRate->value, SignalMessage::NoteOff, 67),
+        new Signal($beat * 4, SignalMessage::NoteOn, NoteHelper::mnfn('C4'), 127),
+        new Signal($beat * 6, SignalMessage::NoteOff, NoteHelper::mnfn('C4')),
+        new Signal($beat * 4, SignalMessage::NoteOn, NoteHelper::mnfn('E4'), 127),
+        new Signal($beat * 6, SignalMessage::NoteOff, NoteHelper::mnfn('E4')),
+        new Signal($beat * 4, SignalMessage::NoteOn, NoteHelper::mnfn('G4'), 127),
+        new Signal($beat * 6, SignalMessage::NoteOff, NoteHelper::mnfn('G4')),
     ]
 );
 $daw->addTrack($track);
@@ -45,18 +53,26 @@ $daw->addTrack($track);
 $daw->setMainProcessors([
     new SimpleReverb(
         SimpleReverbType::Cathedral,
-        0.9,
+        0.6,
         0.8,
         0.1,
         50
-    )
+    ),
+    new SimpleDelay(
+       1200,
+        2000,
+        .2
+    ),
+    new Normalize(),
+    new Fade(FadeType::In, 0, $beat / 16),
+    new Fade(FadeType::Out, $beat * 7, $beat * 8),
 ]);
 
 $daw->render(
     OutputFormat::WAV,
     0,
-    4 * $sampleRate->value, // Render 4 seconds of audio
-    __DIR__ . '/output.wav'
+    $beat * 8, // Render 4 seconds of audio
+    __DIR__ . '/basic_usage.wav'
 );
 ```
 
