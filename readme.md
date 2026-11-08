@@ -4,7 +4,7 @@ A DAW for PHP that is able to generate audio files.
 
 ## Installation
 
-run `composer require thuijzer/php_daw` to require the latest stable version of PHP DAW.
+~~run `composer require thuijzer/php_daw` to require the latest stable version of PHP DAW.~~ (TODO)
 
 ## Basic usage
 
