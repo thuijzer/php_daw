@@ -80,7 +80,7 @@ class SimpleTone implements IProcessor
 
                 if ($currentSignal->message == SignalMessage::NoteOff) {
                     for($p = 0; $p < $polyphony; $p++) {
-                        if($poly[$p]->getState() !== ADSR::Idle && $poly[$p]->getNote() == $currentSignal->value1) {
+                        if($poly[$p]->getState() !== ADSR::Idle && $poly[$p]->getMidiNote() == $currentSignal->value1) {
                             $poly[$p]->off();
                         }
                     }
@@ -121,7 +121,7 @@ class SimpleTonePoly extends SynthHelper
     private float $phaseL = 0.0;
     private float $phaseR = 0.0;
     private float $attackVelocity = 0.0;
-    private int $note;
+    private int $midiNote;
     private float $ampL;
     private float $ampR;
 
@@ -143,9 +143,9 @@ class SimpleTonePoly extends SynthHelper
         );
     }
 
-    public function getNote(): int
+    public function getMidiNote(): int
     {
-        return $this->note;
+        return $this->midiNote;
     }
 
     public function getAmpL(): float
@@ -158,11 +158,11 @@ class SimpleTonePoly extends SynthHelper
         return $this->ampR;
     }
 
-    public function on(int $note, float $velocity):void
+    public function on(int $midiNote, float $velocity):void
     {
-        $this->note = $note;
+        $this->midiNote = $midiNote;
         $this->state = ADSR::Attack;
-        $this->frequency = NoteHelper::frequencyFromNote($note);
+        $this->frequency = NoteHelper::frequencyFromMidiNote($midiNote);
         $this->amplitude = 0.0;
         $this->attackVelocity = $velocity;
         $this->phaseL = 0.0;

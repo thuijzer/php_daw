@@ -9,6 +9,7 @@ use Thuijzer\PhpDaw\Enums\OutputFormat;
 use Thuijzer\PhpDaw\Enums\SampleRate;
 use Thuijzer\PhpDaw\Enums\SignalMessage;
 use Thuijzer\PhpDaw\Enums\WaveForm;
+use Thuijzer\PhpDaw\Helpers\NoteHelper;
 use Thuijzer\PhpDaw\Helpers\TimeHelper;
 use Thuijzer\PhpDaw\Processors\Effects\Fade;
 use Thuijzer\PhpDaw\Processors\Effects\FadeType;
@@ -32,10 +33,10 @@ $daw = new Daw(
 
 $sequencer1 = new Sequencer(
     [
-        new SequencerNote(57, 127),
-        new SequencerNote(60, 127),
-        new SequencerNote(64, 127),
-        new SequencerNote(67, 127),
+        new SequencerNote(NoteHelper::mnfn('A3'), 127),
+        new SequencerNote(NoteHelper::mnfn('C4'), 127),
+        new SequencerNote(NoteHelper::mnfn('E4'), 127),
+        new SequencerNote(NoteHelper::mnfn('G4'), 127),
     ],
     $beat / 4,
     $beat / 8,
@@ -44,10 +45,10 @@ $sequencer1 = new Sequencer(
 );
 $sequencer2 = new Sequencer(
     [
-        new SequencerNote(53, 127),
-        new SequencerNote(57, 127),
-        new SequencerNote(60, 127),
-        new SequencerNote(64, 127),
+        new SequencerNote(NoteHelper::mnfn('F3'), 127),
+        new SequencerNote(NoteHelper::mnfn('A3'), 127),
+        new SequencerNote(NoteHelper::mnfn('C4'), 127),
+        new SequencerNote(NoteHelper::mnfn('E4'), 127),
     ],
     $beat / 4,
     $beat / 8,
@@ -56,10 +57,10 @@ $sequencer2 = new Sequencer(
 );
 $sequencer3 = new Sequencer(
     [
-        new SequencerNote(52, 127),
-        new SequencerNote(55, 127),
-        new SequencerNote(59, 127),
-        new SequencerNote(62, 127),
+        new SequencerNote(NoteHelper::mnfn('E3'), 127),
+        new SequencerNote(NoteHelper::mnfn('G3'), 127),
+        new SequencerNote(NoteHelper::mnfn('B3'), 127),
+        new SequencerNote(NoteHelper::mnfn('D4'), 127),
     ],
     $beat / 4,
     $beat / 8,
